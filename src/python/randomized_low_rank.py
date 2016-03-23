@@ -10,7 +10,7 @@ Authors: David Fridovich-Keil (dfk@eecs.berkeley.edu)
 
 import numpy as np
 
-def RandomizedLowRankLS(A, b):
+def RandomizedLowRankLS(A, b, k):
     """
     Returns an approximate solution to the problem
 
@@ -32,4 +32,23 @@ def RandomizedLowRankLS(A, b):
        QR decomposition.
     """
 
-    # TODO!
+    # Constants.
+    # QUESTION: HOW TO SET p??
+    m, n = A.shape
+    p = int(0.25 * k)
+
+    # Y = A * F is just setting the columns of Y to be sub-sampled, phase-
+    # shifted FFTs of columns of A.
+    Y = np.matlib.zeros((m, k + p))
+    col_indices = np.random.randint(n, size=k + p)
+    phase = 2.0 * np.pi * np.random.rand(n)
+    D = np.exp(1j * phase)
+
+    for jj, ii in enumerate(col_indices):
+        Y[:, jj] = np.fft.fft(A[:, ii] * D[ii])
+
+    # Compute QR factorization of Y.
+    Q, R = np.linalg.qr(Y)
+
+    # Get the k + p most independent rows of Q.
+    # QUESTION: WHAT DOES THIS EVEN MEAN? Q IS ORTHOGONAL!

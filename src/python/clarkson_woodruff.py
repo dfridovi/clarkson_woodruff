@@ -33,8 +33,7 @@ def ClarksonWoodruffLS(A, b):
     """
 
     # Set constants.
-    m = A.shape[0]
-    n = A.shape[1]
+    m, n = A.shape
     e = 1e-4
     t = round((n/e) * (n/e) * (np.log(n/e)**6))
 
@@ -56,4 +55,6 @@ def ClarksonWoodruffLS(A, b):
 
     # Solve the 'prime' problem with randomized low rank factorization via
     # row extraction.
-    return RandomizedLowRankLS(A_prime, b_prime)
+    # QUESTION: HOW TO SEST RANK k??
+    return RandomizedLowRankLS(A_prime, b_prime,
+                               k=int(0.5 * A_prime.shape[0]))
