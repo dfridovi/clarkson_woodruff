@@ -7,7 +7,7 @@
 % Authors: David Fridovich-Keil (dfk@eecs.berkeley.edu)
 %          Erik Nelson (eanelson@eecs.berkeley.edu)
 
-function [x] = clarkson_woodruff_ls(A, b)
+function [x] = clarkson_woodruff_ls(A, b, t, k, p)
 
 % Returns an approximate solution to the problem
 %
@@ -16,7 +16,7 @@ function [x] = clarkson_woodruff_ls(A, b)
 %
 % when A is a sparse mxn matrix. The algorithm is essentially expressed as
 % four steps (where we define some error bound e and set
-% t = (n/e)^2 log(n/e)^6):
+% t = (n/e)^2 log(n/e)^6). Feed this in as a parameter.
 % 1. Construct S = PD a subspace embedding matrix, where P (txm) is random
 %    columns of the identity matrix and D is diagonal mxm matrix where the
 %    entries are IID Bernoulli variables (either 1 or -1 with equal
@@ -29,8 +29,6 @@ function [x] = clarkson_woodruff_ls(A, b)
 
 % Set constants.
 [n, m] = size(A);
-e = 0.98;
-t = round((n/e)^2 * (log(n/e)^6));
 
 % Construct S matrix by doing implicit matrix multiplication.
 D = rand(m, 1);
@@ -51,7 +49,4 @@ b_prime = S * b;
 
 % Solve the 'prime' problem with randomized low rank factorization via
 % row extraction.
-% TODO: HOW TO SEST RANK k??
-k = ceil(0.5 * t);
-p = t - k - 1;
 x = randomized_low_rank_ls(A_prime, b_prime, k, p);
