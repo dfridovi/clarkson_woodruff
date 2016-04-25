@@ -6,7 +6,7 @@
 % Authors: David Fridovich-Keil (dfk@eecs.berkeley.edu)
 %          Erik Nelson (eanelson@eecs.berkeley.edu)
 
-function [x] = randomized_low_rank_ls(A, b, k)
+function [x] = randomized_low_rank_ls(A, b, k, p)
 
 % Returns an approximate solution to the problem
 %
@@ -22,36 +22,44 @@ function [x] = randomized_low_rank_ls(A, b, k)
 % 2. Construct Y = A * F
 % 3. Compute the QR factorization of Y: [Q, R] = qr(Y)
 % 4. Find the k + p most independent rows of Q and reorder so that they are
-%    at the top: eg. for some permutation P, P * Q = [Q1, Q2].T
-% 5. The QR factorization of A is approximately Q1 * R.
-% 6. Solve the least squares problem as usual, given this low-rank
+%    at the top: eg. for some permutation P, P * Q = [Q1; Q2].
+% 5. Let X = P * Q * inv(Q1) = [I; Q2 * inv(Q1)].
+% 6. Let P * A = [A1; A2], where A1 has k + p rows, and A ~ P' * X * A1.
+% 7. Solve the least squares problem as usual, given this low-rank
 %    QR decomposition.
 
 % Constants.
 % TODO: HOW TO SET p??
 [m, n] = size(A);
-p = round(0.25 * k);
 
 % Y = A * F is just setting the columns of Y to be sub-sampled, phase-
 % shifted FFTs of columns of A.
 Y = zeros(m, k+p); 
 col_inds = randi(n, k+p, 1);
-phase = 2.0 * pi * randn(n, 1);
+phase = 2.0 * pi * rand(n, 1);
 D = exp(1i * phase);
 
 for ii = 1 : numel(col_inds)
-    Y(:, ii) = fft(A(:,ii) * D(ii, ii));
+    Y(:, ii) = fft(A(:,col_inds(ii)) * D(col_inds(ii)));
 end
 
-%col_indices = np.random.randint(n, size=k + p)
-%phase = 2.0 * np.pi * np.random.rand(n)
-%D = np.exp(1j * phase)
-
-%for jj, ii in enumerate(col_indices):
-%    Y[:, jj] = np.fft.fft(A[:, ii] * D[ii])
-
 % Compute QR factorization of Y.
-[Q, R, P] = qr(Y);
+[Q, ~] = qr(Y);
 
-% Get the k + p most independent rows of Q.
-% TODO: WHAT DOES THIS EVEN MEAN? Q IS ORTHOGONAL!
+% Get the k + p most independent rows of Q... Estimate as the first k + p
+% indices in the permutation vector returned by a QR decomposition.
+[~, ~, perm] = qr(Q, 'vector');
+perm_t(perm) = 1:length(perm);
+Q1 = Q(perm(1:k + p), :);
+Q2 = Q(perm(k + p + 1:length(perm)), :);
+
+% Create X matrix.
+X = [eye(k + p); Q2 * Q1'];
+
+% Create low-rank approximation to A.
+A1 = A(perm(1:k + p), :);
+temp = X * A1;
+A_approx = temp(perm_t(:), :);
+
+% Solve.
+x = A_approx \ b;

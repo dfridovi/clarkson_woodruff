@@ -29,19 +29,18 @@ function [x] = clarkson_woodruff_ls(A, b)
 
 % Set constants.
 [n, m] = size(A);
-e = 0.99;
+e = 0.98;
 t = round((n/e)^2 * (log(n/e)^6));
 
 % Construct S matrix by doing implicit matrix multiplication.
-D = zeros(n, m);
-D(logical(eye(size(D)))) = rand(min(n, m), 1);
+D = rand(m, 1);
 D(D>0.5) = 1.0;
-D(D<=0.5 & D>0) = -1.0;
+D(D<=0.5) = -1.0;
 
-row_inds = randi(t, m, 1);
+col_inds = randi(t, m, 1);
 S = zeros(t, m);
-for ii = 1:numel(row_inds)
-    S(row_inds(ii), ii) = D(ii, ii);
+for ii = 1:numel(col_inds)
+    S(col_inds(ii), ii) = D(ii);
 end
 
 % Construct A' matrix.
@@ -54,4 +53,5 @@ b_prime = S * b;
 % row extraction.
 % TODO: HOW TO SEST RANK k??
 k = ceil(0.5 * t);
-x = randomized_low_rank_ls(A_prime, b_prime, k);
+p = t - k - 1;
+x = randomized_low_rank_ls(A_prime, b_prime, k, p);
