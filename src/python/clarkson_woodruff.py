@@ -35,7 +35,8 @@ def ClarksonWoodruffLS(A, b):
     # Set constants.
     m, n = A.shape
     e = 1e-4
-    t = round((n/e) * (n/e) * (np.log(n/e)**6))
+    t = round((n/e)**2 * (np.log(n/e)**6))
+    print t
 
     # Construct S matrix by doing implicit matrix multiplication.
     D = np.random.rand(m)
