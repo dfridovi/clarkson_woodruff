@@ -29,24 +29,23 @@ function [x] = randomized_low_rank_ls(A, b, k, p)
 %    QR decomposition.
 
 % Constants.
-% TODO: HOW TO SET p??
 [m, n] = size(A);
 
-% Y = A * F is just setting the columns of Y to be sub-sampled, phase-
-% shifted FFTs of columns of A.
+% Y = A * F is just setting the columns of Y to be phase-
+% shifted FFTs of a random subset of the rows of A.
 Y = zeros(m, k+p); 
 col_inds = randi(n, k+p, 1);
 phase = 2.0 * pi * rand(n, 1);
 D = exp(1i * phase);
 
-for ii = 1 : numel(col_inds)
-    Y(:, ii) = fft(A(:,col_inds(ii)) * D(col_inds(ii)));
+for jj = 1 : k + p
+    Y(:, jj) = fft(A(:, col_inds(jj)) * D(col_inds(jj)));
 end
 
 % Compute QR factorization of Y.
 [Q, ~] = qr(Y);
 
-% Get the k + p most independent rows of Q... Estimate as the first k + p
+% Get the k + p most independent rows of Q. Estimate as the first k + p
 % indices in the permutation vector returned by a QR decomposition.
 [~, ~, perm] = qr(Q, 'vector');
 perm_t(perm) = 1:length(perm);
@@ -60,6 +59,7 @@ X = [eye(k + p); Q2 * Q1'];
 A1 = A(perm(1:k + p), :);
 temp = X * A1;
 A_approx = temp(perm_t(:), :);
+norm(A_approx - A, 'fro')
 
 % Solve.
 x = A_approx \ b;

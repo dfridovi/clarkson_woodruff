@@ -8,37 +8,40 @@
 
 warning('off', 'MATLAB:rankDeficientMatrix');
 warning('off', 'MATLAB:singularMatrix');
+warning('on', 'MATLAB:nearlySingularMatrix');
 
 % Parameters.
-n = 10;  % size of matrices
-N_iter = 20; % number of calls to Clarkson-Woodruff per matrix
-N_mats = 100; % number of matrices to test
+n = 25;  % size of matrices
+N_iter = 1; % number of calls to Clarkson-Woodruff per matrix
+N_mats = 1; % number of matrices to test
 
-t = 20;
-k = 5;
-p = 10;
+t = 100;
+p = 6;
 
-errs = zeros(N_iter * N_mats, 1);
-for ii = 1 : N_mats
-    A = randn(n) / sqrt(n);
-    b = randn(n, 1) / sqrt(n);
-    true_x = A \ b;
-    
-    for jj = 1 : N_iter
-        approx_x = clarkson_woodruff_ls(A, b, t, k, p);
-        errs(jj + (ii-1) * N_mats) = norm(approx_x - true_x) / norm(true_x);
+for k = 10
+    errs = zeros(N_iter * N_mats, 1);
+    for ii = 1 : N_mats
+        A = randn(n) / sqrt(n);
+        b = randn(n, 1) / sqrt(n);
+        true_x = A \ b;
+
+        for jj = 1 : N_iter
+            %approx_x = clarkson_woodruff_ls(A, b, t, k, p);
+            approx_x = randomized_low_rank_ls(A, b, k, p);
+            errs(jj + (ii-1) * N_iter) = norm(approx_x - true_x) / norm(true_x);
+        end
     end
+
+    figure;
+    histogram(errs, 20, 'Normalization', 'probability');
+    xlabel('Relative error');
+    ylabel('Normalized counts');
+    title(sprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d',...
+        t, k, p));
+
+    n_correct = sum(errs < 1e-8);
+    fprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d\n',...
+        t, k, p)
+    fprintf('Accuracy: %3.1f%% (%d / %d)\n',...
+        100 * n_correct / length(errs), n_correct, length(errs));
 end
-
-figure;
-histogram(errs, 20, 'Normalization', 'probability');
-xlabel('Log of error');
-ylabel('Normalized counts');
-title(sprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d',...
-    t, k, p));
-
-n_correct = sum(errs < 1e-8);
-fprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d\n',...
-    t, k, p)
-fprintf('Accuracy: %3.1f%% (%d / %d)\n',...
-    100 * n_correct / length(errs), n_correct, length(errs));
