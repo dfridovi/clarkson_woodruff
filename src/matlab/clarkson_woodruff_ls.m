@@ -28,7 +28,7 @@ function [x] = clarkson_woodruff_ls(A, b, t, k, p)
 %    via row extraction.
 
 % Set constants.
-[n, m] = size(A);
+[m, n] = size(A);
 
 % Construct S matrix by doing implicit matrix multiplication.
 D = rand(m, 1);
@@ -49,4 +49,4 @@ b_prime = S * b;
 
 % Solve the 'prime' problem with randomized low rank factorization via
 % row extraction.
-x = randomized_low_rank_ls(A_prime, b_prime, k, p);
+x = randomized_low_rank_factorization_ls(A_prime, b_prime, k, p);

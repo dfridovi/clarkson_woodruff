@@ -1,4 +1,4 @@
-% randomized_low_rank_ls.m
+% randomized_low_rank_row_extraction_ls.m
 %
 % An implementation of randomized low rank factorization via row extraction,
 % based on the description in the class notes.
@@ -6,7 +6,7 @@
 % Authors: David Fridovich-Keil (dfk@eecs.berkeley.edu)
 %          Erik Nelson (eanelson@eecs.berkeley.edu)
 
-function [x] = randomized_low_rank_ls(A, b, k, p)
+function [x] = randomized_low_rank_row_extraction_ls(A, b, k, p)
 
 % Returns an approximate solution to the problem
 %
@@ -59,7 +59,6 @@ X = [eye(k + p); Q2 * Q1'];
 A1 = A(perm(1:k + p), :);
 temp = X * A1;
 A_approx = temp(perm_t(:), :);
-norm(A_approx - A, 'fro')
 
 % Solve.
 x = A_approx \ b;
