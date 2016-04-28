@@ -12,19 +12,23 @@ warning('off', 'MATLAB:singularMatrix');
 warning('on', 'MATLAB:nearlySingularMatrix');
 
 % Parameters.
-m = 10; n = 5; r = 1;  % size of matrices
-N_iter = 20; % number of calls to Clarkson-Woodruff per matrix
+n = 2;
+k = 5;
+p = 3;
+density = 0.9;
+epsilon = 0.7;
+N_iter = 10; % number of calls to Clarkson-Woodruff per matrix
 N_mats = 100; % number of matrices to test
 
-t = 1000;
-p = 6;
+t = round((n/epsilon)^2 * log(n/epsilon)^6);
 
-for k = 5:5:20
+for m = round([0.1*t, 0.5*t])
     errs = zeros(N_iter * N_mats, 1);
     for ii = 1 : N_mats
-        A = randn(m, n) / sqrt(m);
-        %A(:, r+1:n) = 0;
-        b = randn(m, 1) / sqrt(m);
+        A = sprandn(m, n, density) / sqrt(m);
+        b = sprandn(m, 1, density) / sqrt(m);
+
+        % Get true solution.
         true_x = A \ b;
 
         for jj = 1 : N_iter
@@ -39,12 +43,12 @@ for k = 5:5:20
     histogram(errs, 20, 'Normalization', 'probability');
     xlabel('Relative error');
     ylabel('Normalized counts');
-    title(sprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d',...
-        t, k, p));
+    title(sprintf('Accuracy of Clarkson-Woodruff Algorithm\n m = %d, n = %d',...
+        m, n));
 
     n_correct = sum(errs < 1e-8);
-    fprintf('Accuracy of Clarkson-Woodruff Algorithm\n t = %d, k = %d, p = %d\n',...
-        t, k, p)
+    fprintf('Accuracy of Clarkson-Woodruff Algorithm\n m = %d, n = %d\n',...
+        m, n)
     fprintf('Accuracy: %3.1f%% (%d / %d)\n',...
         100 * n_correct / length(errs), n_correct, length(errs));
 end

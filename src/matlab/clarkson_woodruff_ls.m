@@ -25,7 +25,6 @@ function [x] = clarkson_woodruff_ls(A, b, t, k, p)
 % 3. Construct b' = Sb.
 % 4. Solve arg min ||A'x - b'||   using randomized low rank factorization
 %               x              2
-%    via row extraction.
 
 % Set constants.
 [m, n] = size(A);
@@ -40,6 +39,8 @@ S = zeros(t, m);
 for ii = 1:numel(col_inds)
     S(col_inds(ii), ii) = D(ii);
 end
+
+S = sparse(S);
 
 % Construct A' matrix.
 A_prime = S * A;
