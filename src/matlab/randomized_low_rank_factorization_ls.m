@@ -20,7 +20,6 @@ Y = A * F;
 
 % Form B = Q' * A so that A ~ Q * B = Q * Q' * A
 B = Q' * A;
-A_approx = Q * B;
 
 % Solve.
-x = A_approx \ b;
+x = B \ (Q' * b);
