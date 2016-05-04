@@ -22,4 +22,4 @@ ylabel('Time (s)', 'fontsize', 20);
 lh = legend('CW($$A$$, $$b$$)', 'RLRF($$A$$, $$b$$)');
 set(lh, 'interpreter', 'latex', 'fontsize', 18);
 
-title('Timing comparison for $$A \in R^{1024 x 5}$$', 'interpreter', 'latex', 'fontsize', 20, 'fontweight', 'bold');
+title('Timing comparison for $$A \in R^{128 x 5}$$', 'interpreter', 'latex', 'fontsize', 20, 'fontweight', 'bold');
